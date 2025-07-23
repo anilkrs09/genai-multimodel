@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Embedding Search UI</title>
+</head>
+<body>
+    <h1>Query Your Embeddings</h1>
+    <form id="query-form">
+        <input type="text" id="query-text" placeholder="Enter your search text" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+
+    <h1>Chat with Your Files</h1>
+    <form id="chat-form">
+        <input type="text" id="chat-query" placeholder="Ask something..." required>
+        <button type="submit">Ask</button>
+    </form>
+    <div id="chat-response"></div>
+
+    <h1>Upload PDF</h1>
+    <form id="pdf-form" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload PDF</button>
+    </form>
+
+    <h1>Upload TXT</h1>
+    <form id="txt-form" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload TXT</button>
+    </form>
+
+    <h1>Upload Image</h1>
+    <form id="image-form" enctype="multipart/form-data">
+        <input type="file" name="file" required>
+        <button type="submit">Upload Image</button>
+    </form>
+
+    <script>
+        const form = document.getElementById('query-form');
+        const resultsDiv = document.getElementById('results');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const queryText = document.getElementById('query-text').value;
+            const response = await fetch('/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: queryText })
+            });
+            const results = await response.json();
+            resultsDiv.innerHTML = '<h3>Results:</h3>' + results.map(r => `<div><strong>${r.source_type}</strong>: ${r.content}</div>`).join('');
+        });
+
+        const chatForm = document.getElementById('chat-form');
+        const chatResponse = document.getElementById('chat-response');
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const chatQuery = document.getElementById('chat-query').value;
+            const response = await fetch('/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query: chatQuery })
+            });
+            const data = await response.json();
+            chatResponse.innerHTML = `<h3>Answer:</h3><p>${data.response}</p>`;
+        });
+
+        const pdfForm = document.getElementById('pdf-form');
+        pdfForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(pdfForm);
+            await fetch('/upload-pdf', { method: 'POST', body: formData });
+            alert('PDF uploaded and processed.');
+        });
+
+        const txtForm = document.getElementById('txt-form');
+        txtForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(txtForm);
+            await fetch('/upload-txt', { method: 'POST', body: formData });
+            alert('Text uploaded and processed.');
+        });
+
+        const imageForm = document.getElementById('image-form');
+        imageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(imageForm);
+            await fetch('/upload-image', { method: 'POST', body: formData });
+            alert('Image uploaded and captioned.');
+        });
+    </script>
+</body>
+</html>

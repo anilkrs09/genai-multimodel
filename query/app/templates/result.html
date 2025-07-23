@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Result</title>
+    <style>
+        body { font-family: Arial; margin: 40px; }
+        .chunk { border-bottom: 1px solid #ccc; margin-bottom: 20px; padding-bottom: 10px; }
+        .answer { background-color: #eef; padding: 15px; border-radius: 8px; }
+    </style>
+</head>
+<body>
+    <h1>Question:</h1>
+    <p>{{ result.question }}</p>
+
+    <h2>Answer:</h2>
+    <div class="answer">{{ result.answer }}</div>
+
+    <h2>Top Chunks:</h2>
+    {% for title, filename, text, distance in result.chunks %}
+        <div class="chunk">
+            <h3>{{ title }}</h3>
+            <strong>{{ filename }}</strong><br>
+            <pre>{{ text[:500] }}</pre>
+            <em>Distance: {{ "%.4f"|format(distance) }}</em>
+        </div>
+    {% endfor %}
+</body>
+</html>
+

@@ -1,0 +1,43 @@
+name: pgai 
+services:
+ db:
+   image: timescale/timescaledb-ha:pg17
+   environment:
+     POSTGRES_PASSWORD: postgres
+   ports:
+     - "5432:5432"
+   volumes:
+     - data:/home/postgres/pgdata/data
+ vectorizer-worker:
+   image: timescale/pgai-vectorizer-worker:latest
+   environment:
+     PGAI_VECTORIZER_WORKER_DB_URL: postgres://postgres:postgres@db:5432/postgres
+     OLLAMA_HOST: http://ollama:11434
+   command: [ "--poll-interval", "5s" ]
+ ollama:
+   image: ollama/ollama
+   ports:
+     - "11434:11434"  # maps container port 11434 to localhost
+ pgadmin:
+   container_name: pgadmin_container
+   image: dpage/pgadmin4
+   environment:
+     PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-pgadmin4@pgadmin.org}
+     PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+     PGADMIN_CONFIG_SERVER_MODE: 'False'
+   volumes:
+     - pgadmin:/var/lib/pgadmin
+
+   ports:
+     - "${PGADMIN_PORT:-5050}:80"
+   networks:
+     - postgres
+   restart: unless-stopped
+
+networks:
+  postgres:
+    driver: bridge
+
+volumes:
+    data:
+    pgadmin:
